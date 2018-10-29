@@ -78,7 +78,7 @@ class Numeric_methods():
     
     # Plots graph of truncation errors over steps number
     def truncation_error(self, x0, y0, xf):
-        steps = np.arange(100, 400, 1)
+        steps = np.arange(400, 600, 1)
         es_error = [0] * len(steps)
         ei_error = [0] * len(steps)
         rk_error = [0] * len(steps)
@@ -93,9 +93,9 @@ class Numeric_methods():
             rk_y = self.runge_kutta(x, x0, y0, xf, h)
             ex_y = self.exact(x)
             
-            es_error[i] = sum([abs(ex_y[i] - es_y[i]) for i in range(n) if es_y[i] is not None])
-            ei_error[i] = sum([abs(ex_y[i] - ei_y[i]) for i in range(n) if ei_y[i] is not None])
-            rk_error[i] = sum([abs(ex_y[i] - rk_y[i]) for i in range(n) if rk_y[i] is not None])
+            es_error[i] = sum([(ex_y[i] - es_y[i]) for i in range(n) if es_y[i] is not None])
+            ei_error[i] = sum([(ex_y[i] - ei_y[i]) for i in range(n) if ei_y[i] is not None])
+            rk_error[i] = sum([(ex_y[i] - rk_y[i]) for i in range(n) if rk_y[i] is not None])
             
         
         lm = "lines+markers"
