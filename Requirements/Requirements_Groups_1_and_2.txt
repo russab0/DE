@@ -1,0 +1,10 @@
+Requirements for Groups 1 and 2:
+
+The reports should contain: 
+- Exact solution of the Initial Value Problem. 
+- Structure of the program. 
+- Description of each method (there are three methods) with excerpts of code and some comment that explains what the code does. 
+- Display of the graphs the program displays (what I should get if I run it, but I would like to see the output without to have to run it - in live grading I can check if the graphs of the report correspond to what you get on your computer). 
+- And, the last but not the least: A graph with three plots that show the global truncation error for each method in function of the number of steps (of course if the number of steps increases, then the error decreases - we want to compare how it decreases for each method and to see which method is the best one). 
+
+And a link to a GitHub repository where I can download your code.
