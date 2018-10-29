@@ -1,4 +1,3 @@
-
 #Author: Ruslan Sabirov, BS17-02
 #Variant: 23
 
@@ -9,95 +8,127 @@ y(x0) = y0
 x ∈ [x0, X]
 f(x, y) = y^2 * e^x + 2 * y
 """
+
 import math
 import numpy as np
-import matplotlib.pyplot as plt
 import plotly
 import plotly.graph_objs as go
 
 
-def func(x, y):
-    e = math.e
-    return (y ** 2) * (e ** x) - 2 * y #+++++++++ change to plus
 
 class Numeric_methods():
-    x0 = y0 = xf = f = None
+    h = n = None # h - step, n - number of grid steps
+    EPS = 3 * 10 ** (-3) # epsilon
+    x_discont = 1.38847 # when denominator of exact solution is equal to 0
+    e = math.e # e constant
     
     
-    def __init__(self, x0, y0, X, f, h = 1/100):
-        self.x0 = x0
-        self.y0 = y0
-        self.xf = f
-        self.f = f
-        self.h = h
+    # Returns True if point x lies around point of discontinuity and False otherwise
+    def lies_around_discont(self, x):
+        return self.x_discont - self.EPS < x < self.x_discont + self.EPS
+    
+    
+    # Given function
+    def f(self, x, y):
+        e = self.e
+        return (y ** 2) * (e ** x) + 2 * y    
+    
+    
+    # Exact solution of given function
+    def exact(self, x):
+        e = self.e
+        solution = lambda x: -3 * e ** (2 * x) / (e ** (3 * x) - 64.4199)
+        if type(x) != type(np.arange(0, 1)):
+            return solution(x)
         
-        x = np.arange(x0, X, h)
-        e_y = self.euler(x)
-        ei_y = self.euler_improved(x)
-        rk_y = self.runge_kutta(x)
-        print(x, len(x))
-        # Create a trace
-        e_trace = go.Scatter(
-            x = x,
-            y = e_y,
-            name = "Euler",
-            mode = "lines+markers"
-        )
-        ei_trace = go.Scatter(
-            x = x,
-            y = ei_y,
-            name = "Improved Euler",
-            mode = "lines+markers"
-        )        
-        rk_trace = go.Scatter(
-            x = x,
-            y = rk_y,
-            name = "Runge Kutta",
-            mode = "lines+markers"
-        )                
+        y = [0] * self.n
+        for i in range(self.n):
+            if self.lies_around_discont(x[i]):
+                y[i] = None
+            else:
+                y[i] = solution(x[i])
+        return y
+    
+    
+    def __init__(self, x0, y0, X, n):
+        self.n = n
+        self.h = (X - x0) / n
+        EPS = self.EPS
+        x_discont = self.x_discont        
         
-        data = [e_trace, ei_trace]#, rk_trace]
+        # Calculating x-es and y-s        
+        x = np.arange(x0, X, self.h)
+        es_y = self.euler_standart(x, x0, y0, X)
+        ei_y = self.euler_improved(x, x0, y0, X)
+        rk_y = self.runge_kutta(x, x0, y0, X)
+        ex_y = self.exact(x)
         
-        plotly.offline.plot(data, filename="basic-line.html")        
+        # Creating traces
+        lm = "lines+markers"
+        es_trace = go.Scatter(x = x, y = es_y, name = "Euler", mode = lm)
+        ei_trace = go.Scatter(x = x, y = ei_y, name = "Improved Euler", mode = lm)        
+        rk_trace = go.Scatter(x = x, y = rk_y, name = "Runge Kutta", mode = lm)
+        ex_trace = go.Scatter(x = x, y = ex_y, name = "Exact Solution", mode = lm)        
+        
+        # Drawing a graph
+        data = [es_trace, ei_trace, rk_trace, ex_trace]
+        plotly.offline.plot(data, filename="solutions.html")        
         
     
-    def euler( x0, y, h, x ): 
-        temp = -0
-      
-        # Iterating till the point at which we 
-        # need approximation 
-        while x0 < x: 
-            temp = y 
-            y = y + h * func(x0, y) 
-            x0 = x0 + h         
-    
-    def euler(self, x): 
-        y0, h, f = self.y0, self.h, self.f
+    # Euler method
+    def euler_standart(self, x, x0, y0, xf): 
+        h = self.h
+        f = self.f
         y = [0] * len(x)
         y[0] = y0
         
         for i in range(1, len(x)):
+            if self.lies_around_discont(x[i]):
+                y[i] = None
+                continue
+            if len(y) > 1 and y[i - 1] is None:
+                y[i] = self.exact(x[i])
+                continue                
+            
             y[i] = y[i - 1] + h * f(x[i - 1], y[i - 1])
         return y    
     
     
-    def euler_improved(self, x):
-        y0, h, f = self.y0, self.h, self.f
+    # Improved Euler method
+    def euler_improved(self, x, x0, y0, xf):
+        h = self.h
+        f = self.f
         y = [0] * len(x)
         y[0] = y0
         
         for i in range(1, len(x)):
+            if self.lies_around_discont(x[i]):
+                y[i] = None
+                continue
+            if len(y) > 1 and y[i - 1] is None:
+                y[i] = self.exact(x[i])
+                continue   
+            
             delta_y = h * f(x[i - 1] + h / 2, y[i - 1] + h / 2 * f(x[i - 1], y[i - 1]))
             y[i] = y[i - 1] + delta_y
         return y    
     
     
-    def runge_kutta(self, x):
-        y0, h, f = self.y0, self.h, self.f
+    # Runge-Kutta method
+    def runge_kutta(self, x, x0, y0, xf):
+        h = self.h
+        f = self.f
         y = [0] * len(x)
         y[0] = y0
         
         for i in range(1, len(x)):
+            if self.lies_around_discont(x[i]):
+                y[i] = None
+                continue
+            if len(y) > 1 and y[i - 1] is None:
+                y[i] = self.exact(x[i])
+                continue               
+            
             x_prev = x[i - 1]
             y_prev = y[i - 1]
             k1 = f(x_prev, y_prev)
@@ -111,6 +142,4 @@ class Numeric_methods():
         return y    
     
     
-#TODO change X to 7 
-X = 7
-Numeric_methods(x0 = 1, y0 = 0.5, X = X, f = func, h = 1/50)
+Numeric_methods(x0 = 1, y0 = 0.5, X = 1.7769400000000002, n = 600)
