@@ -9,6 +9,7 @@ x ∈ [x0, X]
 f(x, y) = y^2 * e^x + 2 * y
 """
 
+
 import math
 import numpy as np
 import plotly
@@ -83,10 +84,10 @@ class Numeric_methods():
         y[0] = y0
         
         for i in range(1, len(x)):
-            if self.lies_around_discont(x[i]):
+            if self.lies_around_discont(x[i]): # current point lies around discontinuity
                 y[i] = None
                 continue
-            if len(y) > 1 and y[i - 1] is None:
+            if len(y) > 1 and y[i - 1] is None: # previous point lies around discontinuity
                 y[i] = self.exact(x[i])
                 continue                
             
@@ -102,14 +103,14 @@ class Numeric_methods():
         y[0] = y0
         
         for i in range(1, len(x)):
-            if self.lies_around_discont(x[i]):
+            if self.lies_around_discont(x[i]): # current point lies around discontinuity
                 y[i] = None
                 continue
-            if len(y) > 1 and y[i - 1] is None:
+            if len(y) > 1 and y[i - 1] is None: # previous point lies around discontinuity
                 y[i] = self.exact(x[i])
-                continue   
+                continue       
             
-            delta_y = h * f(x[i - 1] + h / 2, y[i - 1] + h / 2 * f(x[i - 1], y[i - 1]))
+            delta_y = h * f(x[i - 1] + h / 2, y[i - 1] + h / 2 * f(x[i - 1], y[i - 1])) # augmentation
             y[i] = y[i - 1] + delta_y
         return y    
     
@@ -122,13 +123,14 @@ class Numeric_methods():
         y[0] = y0
         
         for i in range(1, len(x)):
-            if self.lies_around_discont(x[i]):
+            if self.lies_around_discont(x[i]): # current point lies around discontinuity
                 y[i] = None
                 continue
-            if len(y) > 1 and y[i - 1] is None:
+            if len(y) > 1 and y[i - 1] is None: # previous point lies around discontinuity
                 y[i] = self.exact(x[i])
-                continue               
+                continue                  
             
+            # Assigning coordinates of previous point to variables
             x_prev = x[i - 1]
             y_prev = y[i - 1]
             k1 = f(x_prev, y_prev)
@@ -136,10 +138,10 @@ class Numeric_methods():
             k3 = f(x_prev + h / 2, y_prev + h * k2 / 2)
             k4 = f(x_prev + h, y_prev + h * k3)
             
-            delta_y = h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+            delta_y = h / 6 * (k1 + 2 * k2 + 2 * k3 + k4) # augmentation
             
             y[i] = y[i - 1] + delta_y
         return y    
     
-    
-Numeric_methods(x0 = 1, y0 = 0.5, X = 1.7769400000000002, n = 600)
+# x0, y0, X, n - could be changed    
+Numeric_methods(x0 = 1, y0 = 0.5, X = 1.77694, n = 600)
