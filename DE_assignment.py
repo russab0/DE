@@ -52,6 +52,7 @@ class Numeric_methods():
     
     def __init__(self, x0, y0, X, n):
         h = (X - x0) / n
+        self.EPS = h / 1.1
         EPS = self.EPS
         x_discont = self.x_discont 
         
@@ -69,16 +70,21 @@ class Numeric_methods():
         rk_trace = go.Scatter(x = x, y = rk_y, name = "Runge Kutta", mode = lm)
         ex_trace = go.Scatter(x = x, y = ex_y, name = "Exact Solution", mode = lm)        
         
+        # Specifying layout
+        layout = dict(title = "Graphs of solutions | X = {}, n = {}".format(X, n),
+                      xaxis = dict(title = "x"),
+                      yaxis = dict(title = "y"))        
+        
         # Drawing a graph
         data = [es_trace, ei_trace, rk_trace, ex_trace]
-        plotly.offline.plot(data, filename="solutions.html")        
+        plotly.offline.plot(dict(data=data, layout=layout), filename="solutions.html")        
         
         self.truncation_error(x0, y0, X)
         
     
     # Plots graph of truncation errors over steps number
     def truncation_error(self, x0, y0, xf):
-        steps = np.arange(400, 600, 1)
+        steps = np.arange(20, 200, 1)
         es_error = [0] * len(steps)
         ei_error = [0] * len(steps)
         rk_error = [0] * len(steps)
@@ -86,6 +92,7 @@ class Numeric_methods():
         for i in range(len(steps)):
             n = steps[i]
             h = (xf - x0) / n
+            self.EPS = h / 2
             
             x = np.arange(x0, xf, h)
             es_y = self.euler_standart(x, x0, y0, xf, h)
@@ -93,9 +100,9 @@ class Numeric_methods():
             rk_y = self.runge_kutta(x, x0, y0, xf, h)
             ex_y = self.exact(x)
             
-            es_error[i] = sum([(ex_y[i] - es_y[i]) for i in range(n) if es_y[i] is not None])
-            ei_error[i] = sum([(ex_y[i] - ei_y[i]) for i in range(n) if ei_y[i] is not None])
-            rk_error[i] = sum([(ex_y[i] - rk_y[i]) for i in range(n) if rk_y[i] is not None])
+            es_error[i] = max([abs(ex_y[i] - es_y[i]) for i in range(n) if es_y[i] and ex_y[i]])
+            ei_error[i] = max([abs(ex_y[i] - ei_y[i]) for i in range(n) if ei_y[i] and ex_y[i]])
+            rk_error[i] = max([abs(ex_y[i] - rk_y[i]) for i in range(n) if rk_y[i] and ex_y[i]])
             
         
         lm = "lines+markers"
@@ -103,8 +110,12 @@ class Numeric_methods():
         ei_err_trace = go.Scatter(x = steps, y = ei_error, name = "Improved Euler", mode = lm)  
         rk_err_trace = go.Scatter(x = steps, y = rk_error, name = "Runge Kutta", mode = lm)   
         
+        layout = dict(title = "Graph of global truncation error depending on number of steps",
+                      xaxis = dict(title = "n — number of steps"),
+                      yaxis = dict(title = "Global error — Maximum of local truncation errors"))
+        
         data = [es_err_trace, ei_err_trace, rk_err_trace]
-        plotly.offline.plot(data, filename="trunc_errors.html")          
+        plotly.offline.plot(dict(data=data, layout=layout), filename="trunc_errors.html")          
             
     
     # Euler method
@@ -173,4 +184,4 @@ class Numeric_methods():
         return y    
     
 # x0, y0, X, n - could be changed    
-Numeric_methods(x0 = 1, y0 = 0.5, X = 7, n = 600)
+Numeric_methods(x0 = 1, y0 = 0.5, X = 7, n = 500)
