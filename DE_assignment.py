@@ -84,7 +84,14 @@ class Numeric_methods():
     
     # Plots graph of truncation errors over steps number
     def truncation_error(self, x0, y0, xf):
-        steps = np.arange(20, 200, 1)
+        #change!!!
+        x0 = 2
+        y0 = self.exact(x0)
+        
+        
+        start_step = 20 # could be changed
+        end_step = 200 # could be changed
+        steps = np.arange(start_step, end_step, 1)
         es_error = [0] * len(steps)
         ei_error = [0] * len(steps)
         rk_error = [0] * len(steps)
